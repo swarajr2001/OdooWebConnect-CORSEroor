@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odoo Login & Signup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full space-y-6">
+    <h1 class="text-3xl font-bold text-center text-gray-800">Odoo Portal</h1>
+
+    <!-- Message box -->
+    <div id="message-box" class="hidden rounded-lg p-3 text-sm" role="alert">
+      <p id="message-text"></p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700">Login</h2>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Database</label>
+        <input type="text" id="db" name="db" required placeholder="e.g., mycompany"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Username (Email)</label>
+        <input type="email" id="username" name="username" required placeholder="e.g., user@example.com"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <button type="submit" id="login-button"
+        class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+        <span id="button-text">Log In</span>
+      </button>
+    </form>
+
+    <hr class="my-6 border-gray-300">
+
+    <!-- Signup Form -->
+    <form id="signup-form" class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700">Sign Up</h2>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Name</label>
+        <input type="text" id="signup-name" required placeholder="Full Name"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Login (Email)</label>
+        <input type="email" id="signup-email" required placeholder="user@example.com"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="signup-password" required placeholder="••••••••"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      </div>
+      <button type="submit" id="signup-button"
+        class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+        <span id="signup-button-text">Create Account</span>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const ODOO_API_BASE = '/odoo'; // proxied in Netlify
+    const MESSAGE_TIMEOUT = 5000;
+
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+
+    function showMessage(message, type) {
+      messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
+      if (type === 'error') {
+        messageBox.classList.add('bg-red-100', 'text-red-800');
+      } else if (type === 'success') {
+        messageBox.classList.add('bg-green-100', 'text-green-800');
+      }
+      messageText.innerText = message;
+      setTimeout(() => {
+        messageBox.classList.add('hidden');
+      }, MESSAGE_TIMEOUT);
+    }
+
+    // Handle Login
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const db = document.getElementById('db').value;
+      const login = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch(`${ODOO_API_BASE}/web/session/authenticate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'call',
+            params: { db, login, password },
+            id: Date.now()
+          }),
+        });
+        const data = await response.json();
+        if (data.error) {
+          showMessage('Login failed: ' + data.error.data.message, 'error');
+        } else {
+          localStorage.setItem('odoo_session_token', data.result.session_id);
+          localStorage.setItem('odoo_user_id', data.result.uid);
+          localStorage.setItem('odoo_username', data.result.name);
+          localStorage.setItem('odoo_db', db);
+          showMessage(`Welcome ${data.result.name}!`, 'success');
+        }
+      } catch (err) {
+        showMessage('Network error during login.', 'error');
+      }
+    });
+
+    // Handle Signup -> Create record in `x_login.user`
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value;
+      const login = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+
+      try {
+        const response = await fetch(`${ODOO_API_BASE}/web/dataset/call_kw`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'call',
+            params: {
+              model: 'x_login.user',
+              method: 'create',
+              args: [{
+                x_name: name,
+                x_login: login,
+                x_password: password, // ⚠️ best practice is hashing this server-side
+              }],
+              kwargs: {},
+            },
+            id: Date.now(),
+          }),
+        });
+        const data = await response.json();
+        if (data.error) {
+          showMessage('Signup failed: ' + data.error.data.message, 'error');
+        } else {
+          showMessage('Account created successfully!', 'success');
+        }
+      } catch (err) {
+        showMessage('Network error during signup.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
+
