@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Our Application</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+    .transition-opacity {
+      transition: opacity 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100">
+
+  <div id="welcome-container" class="flex items-center justify-center min-h-screen transition-opacity fixed inset-0 bg-gray-100 z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full space-y-6 text-center">
+      <h1 class="text-3xl font-bold text-gray-800">Welcome, <span id="username-display"></span>!</h1>
+    </div>
+  </div>
+
+  <div id="app-container" class="hidden flex-grow w-full">
+    <nav class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <h1 class="text-2xl font-bold text-indigo-600">My App</h1>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <a href="#" id="create-records-link" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Create Records</a>
+              <a href="records.html" id="view-records-link" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">View Records</a>
+            </div>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:items-center">
+            <button id="logout-button" class="bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-indigo-700">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="py-10">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div id="create-record-form-container" class="">
+          <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-auto space-y-6">
+            <h2 class="text-lg font-semibold text-gray-700">Create New Record</h2>
+            <form id="create-record-form" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" id="record-name" required placeholder="Full Name"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Login (Email)</label>
+                <input type="email" id="record-email" required placeholder="user@example.com"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="record-password" required placeholder="••••••••"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              </div>
+              <button type="submit" id="create-record-button"
+                class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                <span id="create-record-button-text">Create Record</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="success-popup" class="hidden fixed top-20 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg">
+    <p>Record created successfully!</p>
+    <button id="close-popup-button" class="absolute top-1 right-1 text-white">&times;</button>
+  </div>
+
+  <footer class="bg-white shadow-md mt-auto">
+    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+      <div class="text-center text-gray-500">
+        <p>&copy; 2025 My App. All rights reserved.</p>
+        <p class="mt-1">Crafted with ❤️ by Swaraj R</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/welcome.js"></script>
+</body>
+</html>
